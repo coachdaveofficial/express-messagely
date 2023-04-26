@@ -1,7 +1,8 @@
 const express = require("express");
 const router = new express.Router();
 const Message = require("../models/message");
-const {ensureCorrectUser, ensureLoggedIn} = require("../middleware/auth")
+const {ensureCorrectUser, ensureLoggedIn} = require("../middleware/auth");
+const ExpressError = require("../expressError");
 
 /** GET /:id - get detail of message.
  *
@@ -52,8 +53,12 @@ router.post('/', ensureLoggedIn, async (req, res, next) => {
  *
  **/
 
-router.post('/:id/read', ensureCorrectUser, async (req, res, next) => {
+router.post('/:id/read', ensureLoggedIn, async (req, res, next) => {
     try {
+        const m = await Message.get(req.param.id);
+        if (req.user.username !== m.to_username) {
+            throw new ExpressError("You do not have access to this message", 403)
+        }
         const message = await Message.markRead(req.param.id);
         return res.json({message});
     } catch (e) {

@@ -42,6 +42,7 @@ describe("Test Message class", function () {
       to_username: "test2",
       body: "new"
     });
+    
 
     expect(m).toEqual({
       id: expect.any(Number),
