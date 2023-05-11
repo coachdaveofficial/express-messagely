@@ -39,11 +39,7 @@ router.post('/login', async (req, res, next) => {
 
 router.post('/register', async (req, res, next) => {
     try {
-        const {username, password, first_name, last_name, phone} = req.body;
-        const user = await User.register(username, password, first_name, last_name, phone);
-        if (!user) {
-            throw new ExpressError('Username already in use.', 400)
-        }
+        const {username} = await User.register(req.body);
         let token = jwt.sign({username}, SECRET_KEY);
         await User.updateLoginTimestamp(username)
         return res.json({token})

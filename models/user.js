@@ -14,16 +14,30 @@ class User {
    */
 
   static async register({username, password, first_name, last_name, phone}) {
-      const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
-      const results = await db.query(`
-      INSERT INTO users (username, password, first_name, last_name, phone, join_at, last_login_at)
-      VALUES ($1, $2, $3, $4, $5, current_timestamp, current_timestamp)
-      RETURNING username, password, first_name, last_name, phone`, 
-      [username, hashedPassword, first_name, last_name, phone])
-      if (!results.rows) {
-        throw new ExpressError("Username taken. Please pick another!", 400);
+      let hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
+      try {
+        const results = await db.query(`
+        INSERT INTO users 
+              (username, 
+                password, 
+                first_name, 
+                last_name, 
+                phone, 
+                join_at, 
+                last_login_at)
+        VALUES ($1, $2, $3, $4, $5, current_timestamp, current_timestamp)
+        RETURNING username, password, first_name, last_name, phone`, 
+        [username, hashedPassword, first_name, last_name, phone]);
+
+        if (!results.rows) {
+          throw new ExpressError("Username taken. Please pick another!", 400);
+        }
+
+        return results.rows[0]
+
+      } catch (e) {
+        throw new ExpressError("you messed up", 401)
       }
-      return results.rows[0]
    }
 
   /** Authenticate: is this username/password valid? Returns boolean. */

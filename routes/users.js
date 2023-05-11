@@ -69,3 +69,5 @@ router.get('/:username/from', ensureCorrectUser, async (req, res, next) => {
         return next(e);
     }
 })
+
+module.exports = router;
